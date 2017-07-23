@@ -1,0 +1,49 @@
+# python cache
+__pycache__
+
+# ghostdriver log
+ghostdriver.log
+
+# mirror list
+mirror_list.txt
+
+# countries
+Japan
+Korea_Republic_of
+United_States
+Russian_Federation
+Australia
+Austria
+Thailand
+China
+Sweden
+Indonesia
+Bulgaria
+Mexico
+Netherlands
+Venezuela
+Viet_Nam
+United_Kingdom
+Canada
+Cambodia
+Uruguay
+Hungary
+Venezuela
+Switzerland
+Colombia
+Algeria
+kazakhstan
+Germany
+Taiwan
+Argentina
+Brazil
+Morocco
+Peru
+Turkmenistan
+Egypt
+France
+Angola
+Morocco
+United_Arab_Emirates
+Chile
+Saudi_Arabia
