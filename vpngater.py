@@ -62,6 +62,7 @@ def get_ovpn(url, save_to):
 
 
 def main():
+    global HEAD
     if len(sys.argv) > 1:
         try: HEAD = int(sys.argv[1])
         except: HEAD = 10
@@ -84,7 +85,9 @@ def main():
     dr.get(cururl)
     page = Selector(text=dr.page_source)\
             .xpath('.//td[@id="vpngate_inner_contents_td"]/'
-                    'table[@id="vg_hosts_table_id"]//tr')[:HEAD]
+                    'table[@id="vg_hosts_table_id"]//tr')
+
+    if HEAD < len(page): page = page[:HEAD]
 
     print('Pagelen:',len(page))
 
