@@ -1,5 +1,6 @@
-A Spider to get OpenVPN list on VPNGate
+VPNGater
 ===========
+A Spider to get OpenVPN list on VPNGate.
 
 Dependencies
 -----------
