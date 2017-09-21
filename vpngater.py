@@ -5,7 +5,10 @@ from scrapy.selector import Selector
 from urllib import request, parse, response
 from urllib.request import urlretrieve
 from selenium.webdriver import PhantomJS
-import os, sys
+import os, sys, re
+import socket
+
+socket.setdefaulttimeout(3)
 
 HEAD = 10
 last_percent_reported = None
@@ -19,7 +22,7 @@ def download_progress_hook(count, blockSize, totalSize):
     percent = int(count * blockSize * 100 / totalSize)
 
     if last_percent_reported != percent:
-        if percent % 5 == 0:
+        if percent % 25 == 0:
             sys.stdout.write("%s%%" % percent)
             sys.stdout.flush()
         else:
@@ -33,33 +36,43 @@ def download(filename, dest_filename):
     """Download a file if not present, and make sure it's the right size."""
     dest_filename = os.path.join('.', dest_filename)
     print('Attempting to download:', filename)
-    filename, _ = urlretrieve(url + filename, dest_filename, reporthook=download_progress_hook)
+    filename, _ = urlretrieve(filename, dest_filename, reporthook=download_progress_hook)
     print('\nDownload Complete!')
     return dest_filename
 
 
 def read_mirrors():
     print('Reading Mirrors')
+    mirror_list = []
     if os.path.exists('mirror_list.txt'):
         with open('mirror_list.txt') as f:
-            mirror_list = [i for i in f.read().split('\n') if i]
+            mirror_list.extend([i for i in f.read().split('\n') if i])
             print("Found preserved mirror list:",end="\n    ")
             print("\n    ".join(mirror_list))
-    else:
-        mirror_list = ['http://119.193.36.149:27885/cn/',
-                       'http://58.229.247.84:7279/cn/',
-                       'http://121.151.8.16:62297/cn/',
-                       'http://121.151.8.143:62297/cn/',
-                       'http://27.35.35.241:63923/cn/',
-                      ]
+    mirror_list.extend(['http://119.193.36.149:27885/cn/',
+                   'http://58.229.247.84:7279/cn/',
+                   'http://121.151.8.16:62297/cn/',
+                   'http://121.151.8.143:62297/cn/',
+                   'http://27.35.35.241:63923/cn/',
+                  ])
 
-    mirror_list += ['http://www.vpngate.net']
+    mirror_list.extend(load_mirrors_from_github())
+    mirror_list.extend(['http://www.vpngate.net'])
     return mirror_list
 
 
-def update_mirrors(url):
+def load_mirrors_from_github():
+    print('Fetching Mirrors from Github..')
+    mirrorurl = "https://raw.githubusercontent.com/waylau/vpngate-mirrors/master/README.md"
+    mirror_list = re.findall("(?<=\d\. )http.*/$",request.urlopen(mirrorurl).read().decode('utf8'))
+    print('Fetching Mirrors from Github Succeeded.')
+    return mirror_list
+
+
+def update_mirrors(url, from_github=False):
     # update mirrors
     print('Updating Mirrors..')
+
     mirrorurl = url + 'sites.aspx'
     for i in range(2):
         try:
@@ -105,8 +118,11 @@ def main():
         except:
             print("Testing on",i,"failed")
             continue
-        break
-    update_mirrors(cururl)
+        try:
+            update_mirrors(cururl)
+            break;
+        except:
+            continue;
 
     try: res
     except: raise Warning('All mirrors unavailable!')
